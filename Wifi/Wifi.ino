@@ -1,8 +1,6 @@
 #include <ESP8266WiFi.h>
 
 const char* ssid = "ESP8266 Access Point"; //TODO: Hide later
-//const char* network = "Cicso05019";
-//const char* networkPassword = "MarSdoras";
 const char* network = "Cicso05019-guest";
 const char* networkPassword = "MarTesla";
 //const char* password = "Jax"; //TODO: Hide later
