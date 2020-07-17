@@ -1,66 +1,60 @@
 #include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+//#include <ESPAsyncWebServer.h>
 
-const char* ssid = "ESP8266 Access Point"; //TODO: Hide later
-const char* network = "Cicso05019-guest";
-const char* networkPassword = "MarTesla";
-//const char* password = "Jax"; //TODO: Hide later
+String ssid = "ESP8266 Access Point"; //Change by nickname
+String networkSSID = "network";
+String networkPassword = "password";
+String networkSecurity = "security";
+//char* networkNickname = "nickname";
 byte state = 0;  //0=Hot Spot Mode  ::  1=Hot Spot Mode
 
-WiFiServer server(80);
-WiFiClient client = server.available();
+ESP8266WebServer server(80); //Server on port 80
+WiFiServer wifiServer(80);
+WiFiClient client = wifiServer.available();
 
-void setUpAccessPoint()
-{
+void setUpAccessPoint() {
   Serial.println('\n');
+  WiFi.mode(WIFI_AP);  
   WiFi.softAP(ssid);
-  Serial.print("Access Point \"");
-  Serial.print(ssid);
-  Serial.println("\" started");
+  IPAddress myIP = WiFi.softAPIP(); //Get IP address
+  Serial.print("HotSpot IP:");
+  Serial.println(myIP);
+ 
+  server.on("/", handleRoot);      //Which routine to handle at root location
+  server.on("/settings", HTTP_GET, handleSettings);
+ 
+  server.begin();                  //Start server
+  Serial.println("HTTP server started");
 
-  Serial.print("IP address:\t");
-  Serial.println(WiFi.softAPIP());         // Send the IP address of the ESP8266 to the computer
   state = 0;
 }
 
-void startWebserver()
-{
+//http://<ip address of feeder>/settings?[SSID=???]&[password=???]&[security=???]&[nickname=???]
+
+void handleSettings() {
+   networkSSID = server.arg("SSID");
+   networkPassword = server.arg("password");
+   networkSecurity = server.arg("security");
+   ssid = server.arg("nickname");
+//  String userSSID = server.arg("SSID");
+//  String userPassword = server.arg("password");
+//  String userSecurity = server.arg("security");
+//  String userNickname = server.arg("nickname");
+
+ // networkSSID = userSSID.toCharArray(255,255);
+ // networkPassword = userPassword.toCharArray(255,255);
+ // networkSecurity = userSecurity.toCharArray(255,255);
+ // ssid = userNickname.toCharArray(255,255);
   
-  server.begin();
-  Serial.printf("Web server started, open %s in a web browser\n", WiFi.localIP().toString().c_str());
-  WiFiClient client = server.available();
-  // wait for a client (web browser) to connect
-  if (client)
-  {
-    Serial.println("\n[Client connected]");
-    while (client.connected())
-    {
-      // read line by line what the client (web browser) is requesting
-      if (client.available())
-      {
-        String line = client.readStringUntil('\r');
-        Serial.print(line);
-        // wait for end of client's request, that is marked with an empty line
-        if (line.length() == 1 && line[0] == '\n')
-        {
-          client.println(prepareHtmlPage());
-          break;
-        }
-      }
-    }
-    delay(1); // give the web browser time to receive the data
-
-    // close the connection:
-    client.stop();
-    Serial.println("[Client disonnected]");
   }
-}
-
 
 void accessWifi()
 {
   int connectionTimeout = 0;
-  Serial.printf("Connecting to %s ", network); //Print out connecting to the WIFI network
-  WiFi.begin(network, networkPassword); //Credentials
+  Serial.print("Connecting to  " + ssid); //Print out connecting to the WIFI network
+  WiFi.begin(networkSSID, networkPassword); //Credentials
   //While the WIFI is not connected do the following:
   while (WiFi.status() != WL_CONNECTED && connectionTimeout < 7 ) 
   {
@@ -72,7 +66,7 @@ void accessWifi()
     delay(500);
     connectionTimeout++;
   }
-  if(WiFi.status() != WL_CONNECTED) 
+  if(WiFi.status() != WL_CONNECTED || networkSSID == "" || networkSSID == NULL) 
   {
     state = 0;
     delay(10000); //TODO: Delay might need to be extended at later time.
@@ -82,52 +76,37 @@ void accessWifi()
   {
     WiFi.softAPdisconnect (true);
     state = 1;
-    Serial.println(" connected"); //Displayed if connected
+    Serial.println(" connected"); 
     Serial.printf(WiFi.localIP().toString().c_str());
   }
 }
 
-byte getState()
-{
-  if(WiFi.status() != WL_CONNECTED) 
-  {
-    return 0;
-  }
-  else
-  {
-    return 1; 
-  }
-}
-
-String prepareHtmlPage()
-{
-  String htmlPage =
-     String("HTTP/1.1 200 OK\r\n") +
-            "Content-Type: text/html\r\n" +
-            "Connection: close\r\n" +  // the connection will be closed after completion of the response
-            "Refresh: 5\r\n" +  // refresh the page automatically every 5 sec
-            "\r\n" +
+String htmlPage =
+            String("") +
             "<!DOCTYPE HTML>" +
             "<html>" +
-            "It is connected!  Congrats you did it! =] " +
+            "Enter into the URL the WiFi settings in the following manner: http://<ip address of feeder>/settings?[SSID=???]&[password=???]&[security=???]&[nickname=???] " +
             "</html>" +
             "\r\n";
-  return htmlPage;
+
+void handleRoot() {
+  //String page = prepareHTMLPage;
+  server.send(200, "text/html", htmlPage); //Send web page
 }
 
 void setup()
 {
-  Serial.begin(115200); //What is this?
+  Serial.begin(115200);
   Serial.println();
   pinMode(0, OUTPUT);
   
   setUpAccessPoint();
+  
 }
 
-void loop()
-{
-  
-  if(state == 0)
+void loop() {
+  server.handleClient();
+  if(state == 0 && networkSSID != "" && networkSSID != NULL)
   {
     accessWifi();
   } else if(state == 1 && WiFi.status() != WL_CONNECTED)
