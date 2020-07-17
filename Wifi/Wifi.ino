@@ -6,8 +6,6 @@
 String ssid = "ESP8266 Access Point"; //Change by nickname
 String networkSSID = "network";
 String networkPassword = "password";
-String networkSecurity = "security";
-//char* networkNickname = "nickname";
 byte state = 0;  //0=Hot Spot Mode  ::  1=Hot Spot Mode
 
 ESP8266WebServer server(80); //Server on port 80
@@ -23,7 +21,7 @@ void setUpAccessPoint() {
   Serial.println(myIP);
  
   server.on("/", handleRoot);      //Which routine to handle at root location
-  server.on("/settings", HTTP_GET, handleSettings);
+  server.on("/settings", HTTP_PUT, handleSettings);
  
   server.begin();                  //Start server
   Serial.println("HTTP server started");
@@ -31,23 +29,15 @@ void setUpAccessPoint() {
   state = 0;
 }
 
-//http://<ip address of feeder>/settings?[SSID=???]&[password=???]&[security=???]&[nickname=???]
+//http://<ip address of feeder>/settings?SSID=???&password=???&nickname=???
 
 void handleSettings() {
    networkSSID = server.arg("SSID");
    networkPassword = server.arg("password");
-   networkSecurity = server.arg("security");
    ssid = server.arg("nickname");
-//  String userSSID = server.arg("SSID");
-//  String userPassword = server.arg("password");
-//  String userSecurity = server.arg("security");
-//  String userNickname = server.arg("nickname");
 
- // networkSSID = userSSID.toCharArray(255,255);
- // networkPassword = userPassword.toCharArray(255,255);
- // networkSecurity = userSecurity.toCharArray(255,255);
- // ssid = userNickname.toCharArray(255,255);
-  
+   server.send(204);
+   Serial.print(networkSSID + "   "  +networkPassword);
   }
 
 void accessWifi()
@@ -85,7 +75,7 @@ String htmlPage =
             String("") +
             "<!DOCTYPE HTML>" +
             "<html>" +
-            "Enter into the URL the WiFi settings in the following manner: http://<ip address of feeder>/settings?[SSID=???]&[password=???]&[security=???]&[nickname=???] " +
+            "Enter into the URL the WiFi settings in the following manner: http://<ip address of feeder>/settings?SSID=???&password=???&security=???&nickname=??? " +
             "</html>" +
             "\r\n";
 
