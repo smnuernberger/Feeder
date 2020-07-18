@@ -7,7 +7,7 @@ String ssid = "ESP8266 Access Point"; //Change by nickname
 String networkSSID = "network";
 String networkPassword = "password";
 byte state = 0;  //0=Hot Spot Mode  ::  1=Hot Spot Mode
-double foodAmount = 0;
+int amountDispense = 0;
 const double minFoodAmount = 0.125;
 
 ESP8266WebServer server(80); //Server on port 80
@@ -82,14 +82,30 @@ void handleRoot() {
   server.send(200, "text/html", htmlPage); //Send web page
 }
 
+// /feed?cups=xxx
 void handleFeeding() {
-  double userAmount = server.arg("cups");
+  double userAmount = server.arg("cups").toDouble();
 
-  if(userAmount % minFoodAmount) {
-    
+  if(userAmount > 0) {
+      amountDispense = userAmount / minFoodAmount;
+      if((amountDispense % 1)==0) {
+        server.send(204);
+        Serial.println(amountDispense);
+        
+    } else {
+      handleNotAccepted();
+    }
+  } else {
+    handleNotAccepted();
   }
-  
-  
+}
+
+void handleNotAccepted() {
+  server.send(406, "text/plain", "Value not accepted");
+}
+
+void handleBadRequest() {
+  server.send(400, "text/plain", "Bad Request");
 }
 
 void setup() {
@@ -98,6 +114,7 @@ void setup() {
   pinMode(0, OUTPUT);
   
   setUpAccessPoint(); 
+  server.on("/feed", HTTP_POST, handleFeeding);
 }
 
 void loop() {
