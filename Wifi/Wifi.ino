@@ -7,6 +7,8 @@ String ssid = "ESP8266 Access Point"; //Change by nickname
 String networkSSID = "network";
 String networkPassword = "password";
 byte state = 0;  //0=Hot Spot Mode  ::  1=Hot Spot Mode
+double foodAmount = 0;
+const double minFoodAmount = 0.125;
 
 ESP8266WebServer server(80); //Server on port 80
 WiFiServer wifiServer(80);
@@ -40,14 +42,12 @@ void handleSettings() {
    Serial.print(networkSSID + "   "  +networkPassword);
   }
 
-void accessWifi()
-{
+void accessWifi() {
   int connectionTimeout = 0;
   Serial.print("Connecting to  " + ssid); //Print out connecting to the WIFI network
   WiFi.begin(networkSSID, networkPassword); //Credentials
   //While the WIFI is not connected do the following:
-  while (WiFi.status() != WL_CONNECTED && connectionTimeout < 7 ) 
-  {
+  while (WiFi.status() != WL_CONNECTED && connectionTimeout < 7 ) {
     delay(500);
     Serial.print(".");
     digitalWrite(0, HIGH);
@@ -56,14 +56,12 @@ void accessWifi()
     delay(500);
     connectionTimeout++;
   }
-  if(WiFi.status() != WL_CONNECTED || networkSSID == "" || networkSSID == NULL) 
-  {
+  if(WiFi.status() != WL_CONNECTED || networkSSID == "" || networkSSID == NULL) {
     state = 0;
     delay(10000); //TODO: Delay might need to be extended at later time.
     return;
   }
-  else
-  {
+  else {
     WiFi.softAPdisconnect (true);
     state = 1;
     Serial.println(" connected"); 
@@ -84,23 +82,29 @@ void handleRoot() {
   server.send(200, "text/html", htmlPage); //Send web page
 }
 
-void setup()
-{
+void handleFeeding() {
+  double userAmount = server.arg("cups");
+
+  if(userAmount % minFoodAmount) {
+    
+  }
+  
+  
+}
+
+void setup() {
   Serial.begin(115200);
   Serial.println();
   pinMode(0, OUTPUT);
   
-  setUpAccessPoint();
-  
+  setUpAccessPoint(); 
 }
 
 void loop() {
   server.handleClient();
-  if(state == 0 && networkSSID != "" && networkSSID != NULL)
-  {
+  if(state == 0 && networkSSID != "" && networkSSID != NULL) {
     accessWifi();
-  } else if(state == 1 && WiFi.status() != WL_CONNECTED)
-  {
+  } else if(state == 1 && WiFi.status() != WL_CONNECTED) {
     setUpAccessPoint();
   }
 }
