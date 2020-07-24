@@ -3,11 +3,11 @@
 #include <ESP8266WebServer.h>
 //#include <ESPAsyncWebServer.h>
 
-String ssid = "ESP8266 Access Point"; //Change by nickname
-String networkSSID = "network";
-String networkPassword = "password";
-byte state = 0;  //0=Hot Spot Mode  ::  1=Hot Spot Mode
-int amountDispense = 0;
+String ssid = ""; //Change by nickname
+String networkSSID = "";
+String networkPassword = "";
+byte state = NULL;  //0=Hot Spot Mode  ::  1=Hot Spot Mode
+int amountDispense = NULL;
 const double minFoodAmount = 0.125;
 
 ESP8266WebServer server(80); //Server on port 80
@@ -22,11 +22,11 @@ void setUpAccessPoint() {
   Serial.print("HotSpot IP:");
   Serial.println(myIP);
  
-  server.on("/", handleRoot);      //Which routine to handle at root location
-  server.on("/settings", HTTP_PUT, handleSettings);
- 
   server.begin();                  //Start server
   Serial.println("HTTP server started");
+
+  server.on("/", handleRoot);      //Which routine to handle at root location
+  server.on("/settings", HTTP_PUT, handleSettings);
 
   state = 0;
 }
@@ -39,7 +39,7 @@ void handleSettings() {
    ssid = server.arg("nickname");
 
    server.send(204);
-   Serial.print(networkSSID + "   "  +networkPassword);
+   //Serial.print(networkSSID + "  Line 42  "  +networkPassword);
   }
 
 void accessWifi() {
@@ -85,6 +85,9 @@ void handleRoot() {
 // /feed?cups=xxx
 void handleFeeding() {
   double userAmount = server.arg("cups").toDouble();
+  if(userAmount == NULL){
+    userAmount = 0;
+  }
 
   if(userAmount > 0) {
       amountDispense = userAmount / minFoodAmount;
@@ -110,15 +113,27 @@ void handleBadRequest() {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println();
+  Serial.println(" BLANK ");
   pinMode(0, OUTPUT);
-  
-  setUpAccessPoint(); 
+
+  if(ssid == 0 || ssid == "" ) {
+    ssid = "ESP8266 Access Point";
+  }
+  Serial.println(networkSSID  +  "  Line 119  "  +  networkPassword);
+  if (networkSSID != "" && networkPassword != "") {
+    state = 1;
+    accessWifi();
+  } else {
+    state = 0;
+    setUpAccessPoint();
+  }
+ 
   server.on("/feed", HTTP_POST, handleFeeding);
 }
 
 void loop() {
   server.handleClient();
+  //Serial.println(state + "   LINE 131   " + networkSSID);
   if(state == 0 && networkSSID != "" && networkSSID != NULL) {
     accessWifi();
   } else if(state == 1 && WiFi.status() != WL_CONNECTED) {
