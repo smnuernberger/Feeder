@@ -6,9 +6,6 @@
 String clientName = "";
 String ssid = "";
 String password = "";
-String Essid = "";
-String Epassword = "";
-String EclientName = "";
 byte state = 0;
 
 ESP8266WebServer server(80); //Server on port 80
@@ -119,7 +116,6 @@ void writeValue(String writeString) {
   addressLocation += 1; 
 }
 
-int counter = 0;
 void readValue() {
   delay(10);
   char tempArray[][64] = {"","",""};
@@ -145,8 +141,6 @@ void sendToMemory() {
   writeValue(clientName);
   writeValue(ssid);
   writeValue(password);
-  //EEPROM.commit();
-  //EEPROM.end();
 }
 
 void handleSettings() {
