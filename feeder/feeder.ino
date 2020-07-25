@@ -208,6 +208,8 @@ void setup() {
 
   if(clientName == "" || clientName.length() > 32) {
     clientName = "ESP8266 AP";
+    ssid="";
+    password="";
   }
 
   WiFi.mode(WIFI_STA);
@@ -224,7 +226,7 @@ void loop() {
   if(state == 0 && (ssid != "" || ssid != NULL) && (password != "" || password != NULL)) {
     accessWifi();
     Serial.println(" LINE 200  ");
-  } else if(WiFi.status() != WL_CONNECTED) {
+  } else if(WiFi.status() != WL_CONNECTED && (WiFi.getMode() & WIFI_AP) == 0) {
     Serial.println( " LINE 204  ");
     setUpAccessPoint();
   }
