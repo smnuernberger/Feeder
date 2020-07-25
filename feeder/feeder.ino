@@ -7,6 +7,8 @@ String clientName = "";
 String ssid = "";
 String password = "";
 byte state = 0;
+int amountDispense = NULL;
+const double minFoodAmount = 0.125;
 
 ESP8266WebServer server(80); //Server on port 80
 WiFiServer wifiServer(80);
@@ -164,6 +166,31 @@ void handleSettings() {
   }
 }
 
+void handleFeeding() {
+  double userAmount = server.arg("cups").toDouble();
+  if(userAmount == NULL){
+    userAmount = 0;
+  }
+
+  if(userAmount > 0) {
+      amountDispense = userAmount / minFoodAmount;
+      //if((amountDispense % 1)==0) {
+      if(isDigit(amountDispense)) {
+        server.send(204);
+        Serial.println(amountDispense);
+        
+    } else {
+      handleNotAccepted();
+    }
+  } else {
+    handleNotAccepted();
+  }
+}
+
+void handleSchedule() {
+  
+}
+
 void handleNotAccepted() {
   server.send(406, "text/plain", "Value not accepted");
 }
@@ -179,7 +206,7 @@ void setup() {
 
   readValue();
 
-  if(clientName == "") {
+  if(clientName == "" || clientName.length > 32) {
     clientName = "ESP8266 AP";
   }
 
@@ -187,6 +214,9 @@ void setup() {
   delay(1000);
   setUpAccessPoint();
   accessWifi();
+
+  server.on("/feed", HTTP_POST, handleFeeding);
+  server.on("/schedule", HTTP_POST, handleSchedule);
 }
 
 void loop() {
