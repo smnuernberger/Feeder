@@ -7,7 +7,7 @@ String clientName = "";
 String ssid = "";
 String password = "";
 byte state = 0;
-int amountDispense = NULL;
+float amountDispense = NULL;
 const double minFoodAmount = 0.125;
 
 ESP8266WebServer server(80); //Server on port 80
@@ -174,8 +174,7 @@ void handleFeeding() {
 
   if(userAmount > 0) {
       amountDispense = userAmount / minFoodAmount;
-      //if((amountDispense % 1)==0) {
-      if(isDigit(amountDispense)) {
+      if(!fmod(amountDispense, 1)) {
         server.send(204);
         Serial.println(amountDispense);
         
