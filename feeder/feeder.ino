@@ -198,6 +198,12 @@ void handleBadRequest() {
   server.send(400, "text/plain", "Bad Request");
 }
 
+void handleReset() {
+  for (int i = 0 ; i < EEPROM.length() ; i++) {
+    EEPROM.write(i, 0);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(256);
@@ -216,6 +222,7 @@ void setup() {
 
   server.on("/feed", HTTP_POST, handleFeeding);
   server.on("/schedule", HTTP_POST, handleSchedule);
+  server.on("/schedule", HTTP_DELETE, handleReset);
 }
 
 void loop() {
