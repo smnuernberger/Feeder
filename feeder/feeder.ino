@@ -206,7 +206,7 @@ void setup() {
 
   readValue();
 
-  if(clientName == "" || clientName.length > 32) {
+  if(clientName == "" || clientName.length() > 32) {
     clientName = "ESP8266 AP";
   }
 
