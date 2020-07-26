@@ -9,6 +9,7 @@ String password = "";
 byte state = 0;
 float amountDispense = NULL;
 const double minFoodAmount = 0.125;
+String setTime = "";
 
 ESP8266WebServer server(80); //Server on port 80
 WiFiServer wifiServer(80);
@@ -28,9 +29,9 @@ void setUpAccessPoint() {
 
   state = 0;
 
-  server.on("/", handleRoot);      //Which routine to handle at root location
-  server.on("/scan", HTTP_POST, scanNetworks);
-  server.on("/settings", HTTP_PUT, handleSettings);
+//  server.on("/", handleRoot);      //Which routine to handle at root location
+//  server.on("/scan", HTTP_POST, printNetworks);
+//  server.on("/settings", HTTP_PUT, handleSettings);
 }
 
 void accessWifi() {
@@ -47,8 +48,11 @@ void accessWifi() {
     delay(500);
     connectionTimeout++;
   }
-  if(WiFi.status() != WL_CONNECTED || ssid == "" || ssid == NULL) {
-    delay(10000); //TODO: Delay might need to be extended at later time.
+  if(WiFi.status() != WL_CONNECTED) {
+    delay(1000); //TODO: Delay might need to be extended at later time. 
+    ssid = "";
+    password = "";
+    WiFi.disconnect(true); 
     return;
   } else {
     WiFi.softAPdisconnect (true);
@@ -80,7 +84,15 @@ void handleRoot() {
   server.send(200, "text/html", htmlPage); //Send web page
 }
 
-void scanNetworks() {
+void handleNotAccepted() {
+  server.send(406, "text/plain", "Value not accepted");
+}
+
+void handleBadRequest() {
+  server.send(400, "text/plain", "Bad Request");
+}
+
+void printNetworks() {
   delay(10000);
 
   int networks = WiFi.scanNetworks();
@@ -146,7 +158,7 @@ void sendToMemory() {
 }
 
 void handleSettings() {
-  if(server.hasArg("ssid") && server.hasArg("password")) {
+  if(server.hasArg("ssid")) {
     ssid = server.arg("ssid");
     password = server.arg("password");
     if(server.hasArg("nickname")) {
@@ -155,11 +167,9 @@ void handleSettings() {
     sendToMemory();
     server.send(202);
     accessWifi();
-  } else {
-      if(server.hasArg("ssid") || server.hasArg("password")) {
-        handleBadRequest();   
-      }
-  }
+    } else {
+      handleBadRequest();   
+    }
   if(server.hasArg("nickname") && !server.hasArg("ssid") && !server.hasArg("password")) {
     clientName = server.arg("nickname");
     sendToMemory();
@@ -186,22 +196,40 @@ void handleFeeding() {
   }
 }
 
+// schedule?cups=##&time=???`
 void handleSchedule() {
-  
-}
-
-void handleNotAccepted() {
-  server.send(406, "text/plain", "Value not accepted");
-}
-
-void handleBadRequest() {
-  server.send(400, "text/plain", "Bad Request");
+  if(server.hasArg("cups") && server.hasArg("time")) {
+     handleFeeding();
+     String tempTime = server.arg("time");
+     if(tempTime.length() < 5) {
+      tempTime = "0" + tempTime;
+     }
+     int hour, minute; 
+     hour = tempTime.substring(0,2).toInt();
+     minute = tempTime.substring(3).toInt();
+     if(tempTime[2] = ':' && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 ) {
+      setTime = tempTime;
+     } else {
+      handleBadRequest();
+     }
+  } else {
+    handleBadRequest();
+  }
 }
 
 void handleReset() {
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    EEPROM.write(i, 0);
+  for (int i = 0 ; i < 256 ; i++) {
+    EEPROM.write(i, 0);  
   }
+  server.send(205);
+  clientName = "ESP8266 AP";
+  ssid = "";
+  password = "";
+  sendToMemory();
+  WiFi.disconnect(true); 
+  readValue();
+  setUpAccessPoint();
+  //ESP.restart();
 }
 
 void setup() {
@@ -221,15 +249,18 @@ void setup() {
   delay(1000);
   setUpAccessPoint();
   accessWifi();
-
+  
+  server.on("/", handleRoot);      //Which routine to handle at root location
+  server.on("/scan", HTTP_POST, printNetworks);
+  server.on("/settings", HTTP_PUT, handleSettings);
+  server.on("/settings", HTTP_DELETE, handleReset);
   server.on("/feed", HTTP_POST, handleFeeding);
   server.on("/schedule", HTTP_POST, handleSchedule);
-  server.on("/schedule", HTTP_DELETE, handleReset);
 }
 
 void loop() {
   server.handleClient();
-  if(state == 0 && (ssid != "" || ssid != NULL) && (password != "" || password != NULL)) {
+  if(state == 0 && (ssid != "" || ssid != NULL)) {
     accessWifi();
     Serial.println(" LINE 200  ");
   } else if(WiFi.status() != WL_CONNECTED && (WiFi.getMode() & WIFI_AP) == 0) {
