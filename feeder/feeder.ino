@@ -1,3 +1,4 @@
+#include <SD.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -28,10 +29,6 @@ void setUpAccessPoint() {
   Serial.println("HTTP server started");
 
   state = 0;
-
-//  server.on("/", handleRoot);      //Which routine to handle at root location
-//  server.on("/scan", HTTP_POST, printNetworks);
-//  server.on("/settings", HTTP_PUT, handleSettings);
 }
 
 void accessWifi() {
@@ -49,10 +46,12 @@ void accessWifi() {
     connectionTimeout++;
   }
   if(WiFi.status() != WL_CONNECTED) {
+    Serial.println("Can not connect.  Please check WiFi name and/or password.");
     delay(1000); //TODO: Delay might need to be extended at later time. 
     ssid = "";
     password = "";
     WiFi.disconnect(true); 
+    setUpAccessPoint();
     return;
   } else {
     WiFi.softAPdisconnect (true);
@@ -60,8 +59,6 @@ void accessWifi() {
     state = 1; 
     Serial.printf(WiFi.localIP().toString().c_str());
     delay(5000);
-    EEPROM.commit();
-    EEPROM.end();
   }
 }
 
@@ -144,7 +141,7 @@ void readValue() {
       tempArray[i][j] = checkValue;
       number ++;
     }
-    Serial.println(tempArray[i]);
+    //Serial.println(tempArray[i]);
   }
   clientName = String(tempArray[0]);
   ssid = String(tempArray[1]);
@@ -155,6 +152,7 @@ void sendToMemory() {
   writeValue(clientName);
   writeValue(ssid);
   writeValue(password);
+  EEPROM.commit();
 }
 
 void handleSettings() {
@@ -177,6 +175,7 @@ void handleSettings() {
 }
 
 void handleFeeding() {
+  
   double userAmount = server.arg("cups").toDouble();
   if(userAmount == NULL){
     userAmount = 0;
@@ -196,22 +195,50 @@ void handleFeeding() {
   }
 }
 
+String padTime(String userTime) { 
+  userTime = "0" + userTime;
+  Serial.println("PadTime Function");
+  return userTime;
+}
+
+byte isValidTime(String userTime) { //False = 0; True = 1
+  if(userTime.length() > 5 || userTime.length() < 4) {
+    Serial.println(">5 or < 4");
+    return 0;
+  } else if(userTime.length() == 4) {
+    Serial.println("Sent to padTime()");
+    userTime = padTime(userTime);
+  }
+  int hour, minute; 
+     hour = userTime.substring(0,2).toInt();
+     minute = userTime.substring(3).toInt();
+     if(userTime[2] = ':' && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 ) {
+      Serial.println(hour);
+      Serial.println(minute);
+      Serial.println(setTime);
+      Serial.println(userTime);
+      setTime = userTime;
+      return 1;
+     } else {
+      Serial.println("Bad Line 229");
+      handleBadRequest(); 
+      return 0;
+     }
+}
+
 // schedule?cups=##&time=???`
 void handleSchedule() {
+  setTime = "";
+  amountDispense = NULL;
   if(server.hasArg("cups") && server.hasArg("time")) {
-     handleFeeding();
      String tempTime = server.arg("time");
-     if(tempTime.length() < 5) {
-      tempTime = "0" + tempTime;
-     }
-     int hour, minute; 
-     hour = tempTime.substring(0,2).toInt();
-     minute = tempTime.substring(3).toInt();
-     if(tempTime[2] = ':' && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 ) {
-      setTime = tempTime;
-     } else {
-      handleBadRequest();
-     }
+     byte validTime = isValidTime(tempTime);
+     if(validTime == 1){
+      handleFeeding();
+      Serial.println("Will Write to SD Card");
+     }else {
+      handleNotAccepted();
+     }    
   } else {
     handleBadRequest();
   }
@@ -221,6 +248,7 @@ void handleReset() {
   for (int i = 0 ; i < 256 ; i++) {
     EEPROM.write(i, 0);  
   }
+  EEPROM.commit();
   server.send(205);
   clientName = "ESP8266 AP";
   ssid = "";
