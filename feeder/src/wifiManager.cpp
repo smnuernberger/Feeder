@@ -4,8 +4,6 @@
 #include <Wifi.h>
 #include <ESPmDNS.h>
 
-const int NUMBER_OF_CONNECTION_ATTEMPTS = 10;
-
 WifiManager::WifiManager() {
 
     std::stringstream ss;
@@ -26,20 +24,21 @@ WifiManager::WifiManager() {
 void WifiManager::begin(const Settings settings) {
     const char *ssid = settings.ssid.c_str();
     const char *password = settings.password.c_str();
-    int attempt = 0;
-    if(attempt < NUMBER_OF_CONNECTION_ATTEMPTS) {
+    if((this->settings.ssid.compare(settings.ssid) != 0)||(this->settings.password.compare(settings.password) != 0)) {
         WiFi.begin(ssid, password);
-        delay(500);
-        attempt++;
+        Serial.print("Connecting to...");
+        Serial.println(ssid);
     }
-    if(WiFi.status() == WL_CONNECTED) {
-        WiFi.softAPdisconnect(true);
-    }
+    this->settings = settings;
 }
 
 void WifiManager::checkStatus() {
-    if(WiFi.status() != WL_CONNECTED) {
-        WiFi.softAP("temp AP");
-        WifiManager::begin(settings);
+    if(!WiFi.isConnected() && WiFi.getMode() != WIFI_AP_STA && WiFi.getMode() != WIFI_AP) {
+        WiFi.softAP(defaultName.c_str());
+        Serial.println(defaultName.c_str());
+    } else if(WiFi.isConnected() && WiFi.getMode() == WIFI_AP_STA) {
+        WiFi.softAPdisconnect();
+        Serial.print("[Line 41] Connected to ");
+        Serial.println(settings.ssid.c_str());
     }
 }

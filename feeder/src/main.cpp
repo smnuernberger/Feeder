@@ -8,7 +8,12 @@ Settings settings;
 SdManager *sdManager = new SdManager();
 
 void setup() {
-  sdManager->readSettings();
+  //sdManager->readSettings();
+   settings = {
+        .ssid = "Cicso05019",
+        .password = "MarSdoras",
+        .name = "Foo"
+    };
   wifiManager->begin(settings);
 }
 
