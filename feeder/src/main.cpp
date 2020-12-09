@@ -2,16 +2,16 @@
 
 #include "wifiManager.h"
 #include "settings.h"
-//#include "sdManager.h"
+#include "sdManager.h"
 
 WifiManager *wifiManager = new WifiManager();
 Settings settings;
-//SdManager *sdManager = new SdManager();
+SdManager *sdManager = new SdManager();
 
 void setup() {
   Serial.begin(115200);
   delay(10); 
-  //sdManager->readSettings();
+  sdManager->readSettings();
   Serial.println("Setup Test Line 13");
   
    settings = {
