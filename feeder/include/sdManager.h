@@ -21,9 +21,10 @@ public:
 
 private:
     Settings settings;
+    File myFile;
 
-    template<typename T> T read();
-    template<typename T> void write(T object);
+    std::vector<std::string> read(std::string fileName, char delimiter);
+    void write(std::string fileName, std::vector<std::string> myData, char delimiter);
 
     std::string settingsFile;
     std::string scheduleFile;

@@ -7,6 +7,9 @@ class ScheduleManager {
 public: 
     ScheduleManager();
 
+    bool isValidTime(std::string time);
+    bool isValidAmount(double amount);
+    
     
 };
 
