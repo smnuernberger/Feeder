@@ -28,30 +28,24 @@ SdManager::SdManager() {
 }
 
 Settings SdManager::readSettings() {
-    // File myFile;
-    // Settings settings;
-    // myFile = SD.open(settingsFile.c_str(),FILE_READ);
-    // if(myFile) {
-    //     settings = {
-    //         .ssid = std::string(myFile.readStringUntil('\n').c_str()),
-    //         .password = std::string(myFile.readStringUntil('\n').c_str()),
-    //         .name = std::string(myFile.readStringUntil('\n').c_str()),
-    //     };
-    // }
-    // myFile.close();
-    // return settings;
+    std::vector<string> settingsData = read(settingsFile, '\n');
+
+    return {
+        .ssid = settingsData[0],
+        .password = settingsData[1],
+        .name =  settingsData [2]
+    };
 }
 
 void SdManager::writeSettings(const Settings settings) {
-    // File myFile;
-    // SD.remove(settingsFile.c_str());
-    // myFile = SD.open(settingsFile.c_str(),FILE_WRITE);
-    // if(myFile) {
-    //     myFile.println(settings.ssid.c_str());
-    //     myFile.println(settings.password.c_str());
-    //     myFile.println(settings.name.c_str());
-    // }
-    // myFile.close(); 
+    SD.remove(settingsFile.c_str());
+    
+    std::vector<string> settingsData;
+    settingsData[0] = settings.ssid;
+    settingsData[1] = settings.password;
+    settingsData[2] = settings.name;
+   
+   write(settingsFile, settingsData, '\n');
 }
 
 std::vector<std::string> read(std::string fileName, char delimiter) {
