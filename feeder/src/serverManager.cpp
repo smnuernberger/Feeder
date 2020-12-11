@@ -14,7 +14,7 @@ ServerManager::ServerManager() {
 
 void ServerManager::begin() {
     webserver->begin();
-    webserver->on("/settings", HTTP_GET, std::bind(&ServerManager::handleSETSettings, this));
+    webserver->on("/settings", HTTP_GET, std::bind(&ServerManager::handleGETSettings, this));
     webserver->on("/settings", HTTP_PUT, std::bind(&ServerManager::handleSETSettings, this));
      
     //webserver->on("/string", HTTP_GET, std::bind(&ServerManager::getString, this));
