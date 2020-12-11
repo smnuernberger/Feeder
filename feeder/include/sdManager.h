@@ -1,4 +1,5 @@
 #include <string>
+#include <SD.h>
 
 #include "settings.h"
 #include "schedule.h"
@@ -21,7 +22,7 @@ public:
 
 private:
     Settings settings;
-    File myFile;
+    fs::File myFile;
 
     std::vector<std::string> read(std::string fileName, char delimiter);
     void write(std::string fileName, std::vector<std::string> myData, char delimiter);
