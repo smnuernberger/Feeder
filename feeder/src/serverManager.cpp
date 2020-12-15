@@ -30,14 +30,12 @@ void ServerManager::handleGETSettings() {
 
 void ServerManager::handleSETSettings() {
     Settings newSettings; 
-    if(webserver->hasArg("ssid") && webserver->hasArg("password")) {
-        newSettings = {
-            .ssid = webserver->arg("ssid").c_str(),
-            .password = webserver->arg("password").c_str(),
-            .name = webserver->arg("name").c_str()
-        };
+    newSettings = {
+        .ssid = webserver->arg("ssid").c_str(),
+        .password = webserver->arg("password").c_str(),
+        .name = webserver->arg("name").c_str()
+    };
     onSetSettingsCallback(newSettings);
-    }
 }
 
 

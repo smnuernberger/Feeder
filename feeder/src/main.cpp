@@ -7,7 +7,7 @@
 
 WifiManager *wifiManager = new WifiManager();
 Settings settings;
-//SdManager *sdManager = new SdManager();
+SdManager *sdManager = new SdManager();
 ServerManager *serverManager = new ServerManager();
 Settings getSettings();
 void setSettings(Settings);
@@ -18,13 +18,13 @@ void setup() {
   //sdManager->readSettings();
   Serial.println("Setup Test Line 13");
   
-   settings = {
-        .ssid = "Cicso05019",
-        .password = "MarSdoras",
-        .name = "Foo"
-    };
+  //  settings = {
+  //       .ssid = "Cicso05019",
+  //       .password = "MarSdoras",
+  //       .name = "Foo"
+  //   };
   wifiManager->begin(settings);
-  serverManager->onGetSettings(getSettings);  // Pass the function getSettings() as param.
+  serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
   serverManager->onSetSettings(setSettings);
   serverManager->begin();
 }
@@ -35,9 +35,20 @@ void loop() {
 }
 
 Settings getSettings() {
-  return settings;
+  return sdManager->readSettings();
 }
 
-void setSettings(Settings mySettings) {
-  settings = mySettings;
+void setSettings(Settings newSettings) {
+  if(newSettings.name.empty()) {
+    newSettings.name = settings.name;
+  }
+  if(newSettings.ssid.empty()) {
+    newSettings.ssid = settings.ssid;
+  }
+  if(newSettings.password.empty()) {
+    newSettings.password = settings.password;
+  }
+  settings = newSettings;
+  sdManager->writeSettings(settings);
+  wifiManager->begin(settings);
 }
