@@ -7,16 +7,16 @@ WebServer *webserver = nullptr;
 //string foo;
 std::function<Settings()> onGetSettingsCallback;
 std::function<void(Settings)> onSetSettingsCallback;
+std::function<void()> onDeleteSettingsCallback;
 ServerManager::ServerManager() {
     webserver = new WebServer(80); // HTTP default to port 80 :: HTTPS defaults to port 443
-    
 }
 
 void ServerManager::begin() {
     webserver->begin();
     webserver->on("/settings", HTTP_GET, std::bind(&ServerManager::handleGETSettings, this));
-    webserver->on("/settings", HTTP_PUT, std::bind(&ServerManager::handleSETSettings, this));
-     
+    webserver->on("/settings", HTTP_PUT, std::bind(&ServerManager::handlePUTSettings, this));
+    webserver->on("/settings", HTTP_DELETE, std::bind(&ServerManager::handleDELETESettings, this));
     //webserver->on("/string", HTTP_GET, std::bind(&ServerManager::getString, this));
     //All class function have a hidden first param that is their class.  This overwrites it and forces it to have one param. 
     //webserver->on("/string", HTTP_POST, std::bind(&ServerManager::setString, this));
@@ -31,7 +31,7 @@ void ServerManager::handleGETSettings() {
     webserver->send(200, "application/json", myString.c_str());
 }
 
-void ServerManager::handleSETSettings() {
+void ServerManager::handlePUTSettings() {
     Settings newSettings; 
     newSettings = {
         .ssid = webserver->arg("ssid").c_str(),
@@ -40,6 +40,11 @@ void ServerManager::handleSETSettings() {
     };
     onSetSettingsCallback(newSettings);
     webserver->send(201);
+}
+
+void ServerManager::handleDELETESettings() {
+    
+    webserver->send(204);
 }
 
 void ServerManager::handleClient() {
@@ -52,4 +57,8 @@ void ServerManager::onGetSettings(std::function<Settings()> callback) {
 
 void ServerManager::onSetSettings(std::function<void(Settings)> callback) {
     onSetSettingsCallback = callback;
+}
+
+void ServerManager::onDeleteSettings(std::function<void()> callback) {
+    onDeleteSettingsCallback = callback;
 }

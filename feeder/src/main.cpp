@@ -9,18 +9,23 @@ WifiManager *wifiManager = new WifiManager();
 Settings settings;
 SdManager *sdManager = new SdManager();
 ServerManager *serverManager = new ServerManager();
+
 Settings getSettings();
 void setSettings(Settings);
+void deleteSettings();
 
 void setup() {
   Serial.begin(115200);
   delay(10);
+
   sdManager->begin(); 
   settings = sdManager->readSettings();
-  
-  serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
+
   wifiManager->begin(settings);
+
+  serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
   serverManager->onSetSettings(setSettings);
+  serverManager->onDeleteSettings(deleteSettings);
   serverManager->begin();
 }
 
@@ -44,5 +49,11 @@ void setSettings(Settings newSettings) {
   settings = newSettings;
   sdManager->writeSettings(settings);
   
+  wifiManager->begin(settings);
+}
+
+void deleteSettings() {
+  sdManager->deleteSettings();
+  settings = sdManager->readSettings();
   wifiManager->begin(settings);
 }

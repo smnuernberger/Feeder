@@ -21,6 +21,7 @@ public:
 
     void onGetSettings(std::function<Settings()> callback);
     void onSetSettings(std::function<void(Settings)> callback);
+    void onDeleteSettings(std::function<void()> callback);
 
 private:
     Settings settings;
@@ -28,15 +29,15 @@ private:
     Feeding feeding;
 
     void handleGETSettings();
-    void handleSETSettings();
+    void handlePUTSettings();
     void handleDELETESettings();
 
     void handleGETSchedules();
-    void handleSETSchedule(); 
+    void handlePUTSchedule(); 
     void handleDELETESchedule();
 
     void handleGETFeedings();
-    void handleSETFeeding();
+    void handlePUTFeeding();
     void handleDELETEFeeding();
 
     bool isValidTime(string time);

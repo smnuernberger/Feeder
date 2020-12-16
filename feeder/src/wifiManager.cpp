@@ -46,6 +46,5 @@ void WifiManager::checkStatus() {
             MDNS.addService("petfeeder", "tcp", 80);
         }
         Serial.println(WiFi.localIP());
-
     }
 }

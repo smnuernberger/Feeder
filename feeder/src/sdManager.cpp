@@ -52,7 +52,7 @@ Settings SdManager::readSettings() {
 
 void SdManager::writeSettings(const Settings settings) {
     if(SD.exists(settingsFile.c_str())) {
-        SD.remove(settingsFile.c_str());
+        deleteFile(settingsFile);
     }
 
     std::vector<string> settingsData;
@@ -62,6 +62,10 @@ void SdManager::writeSettings(const Settings settings) {
    
     write(settingsFile, settingsData, '\n');
 } 
+
+void SdManager::deleteSettings() {
+    deleteFile(settingsFile);
+}
 
 std::vector<std::string> SdManager::read(std::string fileName, char delimiter) {
     string fileNameWithSlash = "/" + fileName;
@@ -101,4 +105,8 @@ void SdManager::write(std::string fileName, std::vector<std::string> myData, cha
         Serial.println("Did not write to File");
     }
     myFile.close();
+}
+
+void SdManager::deleteFile(std::string fileName) {
+    SD.remove(fileName.c_str());
 }

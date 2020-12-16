@@ -15,6 +15,7 @@ public:
 
     Settings readSettings();
     void writeSettings(Settings settings);
+    void deleteSettings();
 
     Schedule readSchedule();
     void writeSchedule(Schedule schedule);
@@ -28,6 +29,7 @@ private:
 
     std::vector<std::string> read(std::string fileName, char delimiter);
     void write(std::string fileName, std::vector<std::string> myData, char delimiter);
+    void deleteFile(std::string fileName);
 
     std::string settingsFile;
     std::string scheduleFile;
