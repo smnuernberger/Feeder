@@ -45,6 +45,8 @@ private:
 
     string convertToString(char* array, int size); 
 
+    void handleBadRequest(string text); 
+
 };
 
 #endif

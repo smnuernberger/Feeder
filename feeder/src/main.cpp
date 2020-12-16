@@ -35,17 +35,27 @@ void loop() {
 }
 
 void setSettings(Settings newSettings) {
+  if(settings.ssid.compare(newSettings.ssid) != 0 && newSettings.password.empty()) {
+    settings.password = "";
+    Serial.print("old pw:  ");
+    Serial.println(settings.password.c_str());
+    Serial.print("new pw:  ");
+    Serial.println(newSettings.password.c_str());
+  }
   if(newSettings.name.empty()) {
     newSettings.name = settings.name;
+  } 
+  if(newSettings.password.empty()) {
+    newSettings.password = settings.password;
   }
   if(newSettings.ssid.empty()) {
     newSettings.ssid = settings.ssid;
   }
-  if(newSettings.password.empty()) {
-    newSettings.password = settings.password;
-  }
-  
+  Serial.println("after IFs setSettings() Line 54");
   Serial.println(newSettings.ssid.c_str());
+  Serial.println(newSettings.password.c_str());
+  Serial.println(newSettings.name.c_str()); 
+
   settings = newSettings;
   sdManager->writeSettings(settings);
   

@@ -26,9 +26,12 @@ void WifiManager::begin(const Settings settings) {
     const char *ssid = settings.ssid.c_str();
     const char *password = settings.password.c_str();
     if((this->settings.ssid.compare(settings.ssid) != 0)||(this->settings.password.compare(settings.password) != 0)) {
-        WiFi.begin(ssid, password);
-        Serial.print("Connecting to...");
-        Serial.println(ssid);
+        WiFi.disconnect();
+        delay(10);
+        if(!settings.ssid.empty()) {
+            WiFi.begin(ssid, password);
+            Serial.println(password);
+        }
     }
     this->settings = settings;
 }

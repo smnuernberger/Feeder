@@ -4,7 +4,7 @@
 
 
 WebServer *webserver = nullptr;
-//string foo;
+
 std::function<Settings()> onGetSettingsCallback;
 std::function<void(Settings)> onSetSettingsCallback;
 std::function<void()> onDeleteSettingsCallback;
@@ -17,13 +17,11 @@ void ServerManager::begin() {
     webserver->on("/settings", HTTP_GET, std::bind(&ServerManager::handleGETSettings, this));
     webserver->on("/settings", HTTP_PUT, std::bind(&ServerManager::handlePUTSettings, this));
     webserver->on("/settings", HTTP_DELETE, std::bind(&ServerManager::handleDELETESettings, this));
-    //webserver->on("/string", HTTP_GET, std::bind(&ServerManager::getString, this));
+    
     //All class function have a hidden first param that is their class.  This overwrites it and forces it to have one param. 
-    //webserver->on("/string", HTTP_POST, std::bind(&ServerManager::setString, this));
 }
 
 void ServerManager::handleGETSettings() {
-    Serial.println("In handleGETSettings()");
     Serial.println(settings.ssid.c_str());
     Serial.println(settings.name.c_str());
     Settings settings = onGetSettingsCallback();
@@ -38,13 +36,14 @@ void ServerManager::handlePUTSettings() {
         .password = webserver->arg("password").c_str(),
         .name = webserver->arg("name").c_str()
     };
-    onSetSettingsCallback(newSettings);
     webserver->send(201);
+    onSetSettingsCallback(newSettings);
 }
 
-void ServerManager::handleDELETESettings() {
-    
+void ServerManager::handleDELETESettings() { 
     webserver->send(204);
+    onDeleteSettingsCallback();
+    
 }
 
 void ServerManager::handleClient() {
@@ -61,4 +60,8 @@ void ServerManager::onSetSettings(std::function<void(Settings)> callback) {
 
 void ServerManager::onDeleteSettings(std::function<void()> callback) {
     onDeleteSettingsCallback = callback;
+}
+
+void ServerManager::handleBadRequest(string text) {
+    webserver->send(400, "text/plain", text.c_str());
 }

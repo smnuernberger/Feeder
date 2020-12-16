@@ -30,10 +30,8 @@ void SdManager::begin() {
 }
 
 Settings SdManager::readSettings() {
-    Serial.println("Line 32: readSettings()");
     string fileNameWithSlash = "/" + settingsFile;
     if(SD.open(fileNameWithSlash.c_str())) {
-        Serial.println("Line 34: readSettings()");
         std::vector<string> settingsData = read(settingsFile, '\n');
         return {
             .ssid = settingsData[0],
@@ -41,7 +39,6 @@ Settings SdManager::readSettings() {
             .name =  settingsData[2]
         };
     } else {
-        Serial.println("Line 43: readSettings()");
         return {
             .ssid = "",
             .password = "",
@@ -70,11 +67,10 @@ void SdManager::deleteSettings() {
 std::vector<std::string> SdManager::read(std::string fileName, char delimiter) {
     string fileNameWithSlash = "/" + fileName;
     File myFile = SD.open(fileNameWithSlash.c_str(), FILE_READ);
-    Serial.println("Line 64 in read()");
+
     std::vector<string> myData;
     std::string line; 
 
-    Serial.println("Line 67 read()");
     while(myFile.available()) {
         line = myFile.readStringUntil(delimiter).c_str();
         Serial.println(line.c_str());
@@ -108,5 +104,11 @@ void SdManager::write(std::string fileName, std::vector<std::string> myData, cha
 }
 
 void SdManager::deleteFile(std::string fileName) {
-    SD.remove(fileName.c_str());
+    string fileNameWithSlash = "/" + fileName;
+    SD.remove(fileNameWithSlash.c_str());
+    if(SD.exists(fileName.c_str())) {
+        Serial.println("File not deleted");
+    } else {
+        Serial.println("File deleted"); 
+    }
 }
