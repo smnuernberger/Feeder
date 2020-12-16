@@ -11,6 +11,8 @@ class SdManager {
 public: 
     SdManager();
 
+    void begin();
+
     Settings readSettings();
     void writeSettings(Settings settings);
 

@@ -14,9 +14,9 @@ void setSettings(Settings);
 
 void setup() {
   Serial.begin(115200);
-  delay(10); 
+  delay(10);
+  sdManager->begin(); 
   settings = sdManager->readSettings();
-  Serial.println("Setup Test Line 13");
   
   serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
   wifiManager->begin(settings);
