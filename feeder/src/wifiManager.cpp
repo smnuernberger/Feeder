@@ -40,9 +40,11 @@ void WifiManager::checkStatus() {
         Serial.println(WiFi.softAPIP());
     } else if(WiFi.isConnected() && WiFi.getMode() == WIFI_AP_STA) {
         WiFi.softAPdisconnect(true);
-        Serial.print("[Line 41] Connected to ");
-        Serial.println(settings.ssid.c_str());
+       
         delay(1000);
+        if(MDNS.begin(defaultName.c_str())) {
+            MDNS.addService("petfeeder", "tcp", 80);
+        }
         Serial.println(WiFi.localIP());
 
     }
