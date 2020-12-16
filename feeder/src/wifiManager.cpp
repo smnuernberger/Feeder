@@ -37,6 +37,7 @@ void WifiManager::checkStatus() {
     if(!WiFi.isConnected() && WiFi.getMode() != WIFI_AP_STA && WiFi.getMode() != WIFI_AP) {
         WiFi.softAP(defaultName.c_str());
         Serial.println(defaultName.c_str());
+        Serial.println(WiFi.softAPIP());
     } else if(WiFi.isConnected() && WiFi.getMode() == WIFI_AP_STA) {
         WiFi.softAPdisconnect(true);
         Serial.print("[Line 41] Connected to ");

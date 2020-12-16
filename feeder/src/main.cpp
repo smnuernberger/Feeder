@@ -15,16 +15,11 @@ void setSettings(Settings);
 void setup() {
   Serial.begin(115200);
   delay(10); 
-  //sdManager->readSettings();
+  settings = sdManager->readSettings();
   Serial.println("Setup Test Line 13");
   
-  //  settings = {
-  //       .ssid = "Cicso05019",
-  //       .password = "MarSdoras",
-  //       .name = "Foo"
-  //   };
-  wifiManager->begin(settings);
   serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
+  wifiManager->begin(settings);
   serverManager->onSetSettings(setSettings);
   serverManager->begin();
 }
@@ -32,10 +27,6 @@ void setup() {
 void loop() {
   wifiManager->checkStatus();
   serverManager->handleClient();
-}
-
-Settings getSettings() {
-  return sdManager->readSettings();
 }
 
 void setSettings(Settings newSettings) {
@@ -48,7 +39,10 @@ void setSettings(Settings newSettings) {
   if(newSettings.password.empty()) {
     newSettings.password = settings.password;
   }
+  
+  Serial.println(newSettings.ssid.c_str());
   settings = newSettings;
   sdManager->writeSettings(settings);
+  
   wifiManager->begin(settings);
 }

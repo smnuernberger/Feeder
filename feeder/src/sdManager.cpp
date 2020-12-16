@@ -13,43 +13,56 @@
 using namespace std;
 
 SdManager::SdManager() {
-    cout << "Initializing SD card...";
-    if (!SD.begin(10)) {
-        cout << "Initialization failed.";
+    Serial.println("Initializing SD card...");
+    // Param 22 is the pin that the 'CS' is plugged into. 
+    if (!SD.begin(22)) {
+        Serial.println("Initialization failed.");
         while(1);
     }
-    cout << "Initialization Completed";
+    Serial.println("Initialization Completed");
 
     Settings settings; 
     string feederName = settings.name.c_str();
-    settingsFile = feederName + "_settings.txt";
-    scheduleFile = feederName + "_schedule.txt";
-    feedingFile = feederName + "_feeding.txt";
+    settingsFile = "settings.txt";
+    scheduleFile = "schedule.txt";
+    feedingFile = "feeding.txt";
 }
 
 Settings SdManager::readSettings() {
-    std::vector<string> settingsData = read(settingsFile, '\n');
-
-    return {
-        .ssid = settingsData[0],
-        .password = settingsData[1],
-        .name =  settingsData [2]
-    };
+    if(SD.exists(settingsFile.c_str())) {
+        std::vector<string> settingsData = read(settingsFile, '\n');
+        return {
+            .ssid = settingsData[0],
+            .password = settingsData[1],
+            .name =  settingsData[2]
+        };
+    } else {
+        return {
+            .ssid = "",
+            .password = "",
+            .name =  ""
+        };
+    }
 }
 
 void SdManager::writeSettings(const Settings settings) {
-    SD.remove(settingsFile.c_str());
+    if(SD.exists(settingsFile.c_str())) {
+        SD.remove(settingsFile.c_str());
+    }
 
     std::vector<string> settingsData;
-    settingsData[0] = settings.ssid;
-    settingsData[1] = settings.password;
-    settingsData[2] = settings.name;
-   
-   write(settingsFile, settingsData, '\n');
-}
+    settingsData.push_back(settings.ssid);
+    settingsData.push_back(settings.password);
+    settingsData.push_back(settings.name);
+    Serial.println("Line 57: from vector");
+    Serial.println(settingsData[0].c_str());
+    Serial.println(settingsData[2].c_str());
+    write(settingsFile, settingsData, '\n');
+} 
 
-std::vector<std::string> read(std::string fileName, char delimiter) {
-    File myFile = SD.open(fileName.c_str(), FILE_READ);
+std::vector<std::string> SdManager::read(std::string fileName, char delimiter) {
+    string fileNameWithSlash = "/" + fileName;
+    File myFile = SD.open(fileNameWithSlash.c_str(), FILE_READ);
     std::vector<string> myData;
     string line;
     stringstream fullLine(line);
@@ -61,13 +74,17 @@ std::vector<std::string> read(std::string fileName, char delimiter) {
         while(getline(fullLine, temp, delimiter)) {
             myData.push_back(temp);
         }
-        return myData;
     }
+    return myData;
     myFile.close();
 }
 
-void write(std::string fileName, std::vector<std::string> myData, char delimiter) {
-    File myFile = SD.open(fileName.c_str(), FILE_WRITE);
+void SdManager::write(std::string fileName, std::vector<std::string> myData, char delimiter) {
+    File myFile;
+    string fileNameWithSlash = "/" + fileName;
+    myFile = SD.open(fileNameWithSlash.c_str(), FILE_WRITE);
+    Serial.print("Line 83 in write(): ");
+    Serial.println(fileName.c_str());
     std::string line; 
     std::string lineToFile;
     int myDataLength = myData.size();
@@ -76,12 +93,16 @@ void write(std::string fileName, std::vector<std::string> myData, char delimiter
         lineToFile += myData[i];
         lineToFile += delimiter;
     }
+    Serial.println("Line 94  ");
+    Serial.println(lineToFile.c_str());
     if(myFile) {
+        Serial.println("Line 94 SDManager  ");
+        Serial.println(lineToFile.c_str());
         myFile.println(lineToFile.c_str());
         Serial.println(lineToFile.c_str());
         Serial.println("Write to File Completed");
     } else {
-        Serial.print("Did not write to File");
+        Serial.println("Did not write to File");
     }
     myFile.close();
 }

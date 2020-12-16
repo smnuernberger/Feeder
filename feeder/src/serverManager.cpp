@@ -23,6 +23,9 @@ void ServerManager::begin() {
 }
 
 void ServerManager::handleGETSettings() {
+    Serial.println("In handleGETSettings()");
+    Serial.println(settings.ssid.c_str());
+    Serial.println(settings.name.c_str());
     Settings settings = onGetSettingsCallback();
     std::string myString = "{ \"ssid\" : \"" + settings.ssid + "\", \"name\" : \"" + settings.name + "\" }";
     webserver->send(200, "application/json", myString.c_str());
@@ -36,27 +39,8 @@ void ServerManager::handleSETSettings() {
         .name = webserver->arg("name").c_str()
     };
     onSetSettingsCallback(newSettings);
+    webserver->send(201);
 }
-
-
-// void ServerManager::getString() {
-//     webserver->send(200, "application/json", foo.c_str());
-//     Serial.print("get foo ");
-//     Serial.println(foo.c_str());
-   
-// }
-
-// void ServerManager::setString() {
-//     //const char* bar = webserver->arg("value").c_str();
-//     string bar = webserver->arg("value").c_str();
-//     foo = std::string(bar);
-//     //std::string foo = bar; 
-//     Serial.print("set foo ");
-//     Serial.println(foo.c_str());
-//     Serial.print("set bar ");
-//     Serial.println(bar.c_str());
-//     webserver->send(201);
-// }
 
 void ServerManager::handleClient() {
     webserver->handleClient();
