@@ -96,7 +96,5 @@ void setFeeding(Feeding newFeeding) {
 }
 
 double getDispenseNumberOfTimes(double newAmount) {
-  //String foo = String((newAmount / minFeedingAmount), 3);
-  //Serial.println(foo);
   return (newAmount / minFeedingAmount);
 }
