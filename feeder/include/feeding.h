@@ -4,7 +4,7 @@
 #define FEEDING
 
 struct Feeding {
-    std::string timeFed;
-    double amountFed;
+    std::string feedingTime;
+    double feedingAmount;
 };
 #endif

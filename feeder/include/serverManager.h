@@ -2,7 +2,6 @@
 #include <bits/stdc++.h>
 
 #include "settings.h"
-#include "schedule.h"
 #include "feeding.h"
 
 #ifndef SERVER_SETTINGS  
@@ -22,30 +21,29 @@ public:
     void onGetSettings(std::function<Settings()> callback);
     void onSetSettings(std::function<void(Settings)> callback);
     void onDeleteSettings(std::function<void()> callback);
+    void onGetMinFeedingAmount(std::function<double()> callback);
+    void onSetFeeding(std::function<void(Feeding)> callback);
 
 private:
     Settings settings;
-    Schedule schedule;
     Feeding feeding;
 
     void handleGETSettings();
     void handlePUTSettings();
     void handleDELETESettings();
 
-    void handleGETSchedules();
-    void handlePUTSchedule(); 
-    void handleDELETESchedule();
-
     void handleGETFeedings();
-    void handlePUTFeeding();
+    void handlePOSTFeeding();
     void handleDELETEFeeding();
 
-    bool isValidTime(string time);
-    bool isValidAmount(double amount);
+    bool isTimeValid(string time);
+    bool isAmountValid(string amount);
+    bool isValidFeedingSize(double amount);
 
     string convertToString(char* array, int size); 
 
     void handleBadRequest(string text); 
+    void handleNotAcceptable(string text); 
 
 };
 

@@ -1,18 +1,28 @@
 #include <Arduino.h>
+#include <string>
 
 #include "wifiManager.h"
 #include "settings.h"
 #include "sdManager.h"
 #include "serverManager.h"
+#include "feeding.h"
+#include "motorManager.h"
 
 WifiManager *wifiManager = new WifiManager();
 Settings settings;
 SdManager *sdManager = new SdManager();
 ServerManager *serverManager = new ServerManager();
+Feeding feeding;
+MotorManager *motorManager = new MotorManager();
 
+const double minFeedingAmount = 0.125;
+
+double getMinFeedingAmount();
 Settings getSettings();
 void setSettings(Settings);
 void deleteSettings();
+void setFeeding(Feeding);
+double getDispenseNumberOfTimes(double);
 
 void setup() {
   Serial.begin(115200);
@@ -26,12 +36,21 @@ void setup() {
   serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
   serverManager->onSetSettings(setSettings);
   serverManager->onDeleteSettings(deleteSettings);
+  serverManager->onGetMinFeedingAmount(getMinFeedingAmount);
+  serverManager->onSetFeeding(setFeeding);
   serverManager->begin();
+
+  //motorManager->onGetDispenseNumberOfTimes();
+  //motorManager->begin();
 }
 
 void loop() {
   wifiManager->checkStatus();
   serverManager->handleClient();
+}
+
+double getMinFeedingAmount() {
+  return minFeedingAmount;
 }
 
 void setSettings(Settings newSettings) {
@@ -51,7 +70,6 @@ void setSettings(Settings newSettings) {
   if(newSettings.ssid.empty()) {
     newSettings.ssid = settings.ssid;
   }
-  Serial.println("after IFs setSettings() Line 54");
   Serial.println(newSettings.ssid.c_str());
   Serial.println(newSettings.password.c_str());
   Serial.println(newSettings.name.c_str()); 
@@ -66,4 +84,19 @@ void deleteSettings() {
   sdManager->deleteSettings();
   settings = sdManager->readSettings();
   wifiManager->begin(settings);
+}
+
+void setFeeding(Feeding newFeeding) {
+  String tempCupString = String(newFeeding.feedingAmount, 3);
+  Serial.print("Cups Entered: ");
+  Serial.println(tempCupString);
+  Serial.print("Amount Motor turns:  ");
+  String tempTurnString = String(getDispenseNumberOfTimes(newFeeding.feedingAmount), 0);
+  Serial.println(tempTurnString);
+}
+
+double getDispenseNumberOfTimes(double newAmount) {
+  //String foo = String((newAmount / minFeedingAmount), 3);
+  //Serial.println(foo);
+  return (newAmount / minFeedingAmount);
 }
