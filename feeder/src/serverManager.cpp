@@ -70,12 +70,19 @@ void ServerManager::handlePOSTFeeding() {
 
 void ServerManager::handlePOSTSchedule() {
     Schedule newSchedule;
+    newSchedule.scheduleAmount = 0;
+    newSchedule.scheduleTime = "";
     string scheduleTime = webserver->arg("time").c_str();
     string scheduleAmountString = webserver->arg("cups").c_str();
-
-    if(isTimeValid(timeString)) {
-        newFeeding.feedingTime = timeString;
+    if(isAmountValid(scheduleAmountString)) {
+        newSchedule.scheduleAmount = strtod(scheduleAmountString.c_str(), NULL);
     }
+    if(isTimeValid(scheduleTime)) {
+        newSchedule.scheduleTime = scheduleTime;
+    }
+
+    webserver->send(204);
+    onSetScheduleCallback(newSchedule);
 }
 
 void ServerManager::handleClient() {
@@ -110,12 +117,15 @@ void ServerManager::onGetMinFeedingAmount(std::function<double()> callback) {
     onGetMinFeedingAmountCallback = callback;
 }
 
-bool ServerManager::isTimeValid(string timeString) {
+void ServerManager::onGetSchedule(std::function<Schedule()> callback) {
+    onGetScheduleCallback = callback;
+}
 
+void ServerManager::onSetSchedule(std::function<void(Schedule)> callback) {
+    onSetScheduleCallback = callback;
 }
 
 bool ServerManager::isAmountValid(string amountString) {
-
     if(amountString.empty()) {
         string errorMessage = "Please enter a value in cups.";
         handleBadRequest(errorMessage);
@@ -140,5 +150,48 @@ bool ServerManager::isAmountValid(string amountString) {
 bool ServerManager::isValidFeedingSize(double amount) {
     double feedingSize = amount / onGetMinFeedingAmountCallback();
     return floor(feedingSize) == feedingSize;
+}
+
+bool ServerManager::isTimeValid(string userTime) {
+    if(userTime.length() == 4 || userTime.length() == 5) {
+        if(userTime.length() == 4) {
+            userTime = padTime(userTime);
+        }
+        
+        int newHour = atoi(userTime.substr(0,2).c_str());
+        int newMinute = atoi(userTime.substr(3).c_str());
+
+        if(isHourValid(newHour) && isMinutesValid(newMinute)) {
+            return true;
+        } else {
+            string errorMessage = "Please enter a valid time [example: 10:00].";
+            handleNotAcceptable(errorMessage);
+            return false;
+        }
+    } else {
+        string errorMessage = "Please enter a time.";
+        handleBadRequest(errorMessage);
+        return false;
+    }
+}
+
+string ServerManager::padTime(string userTime) {
+    return "0" + userTime;
+}
+
+bool ServerManager::isHourValid(int userHour) {
+    if(userHour < 0 || userHour > 23) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+bool ServerManager::isMinutesValid(int userMinutes) {
+    if(userMinutes < 0 || userMinutes > 59) {
+        return false;
+    } else {
+        return true;
+    }
 }
 

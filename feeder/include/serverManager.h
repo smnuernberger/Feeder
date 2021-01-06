@@ -40,14 +40,19 @@ private:
     void handleGetSchedule();
     void handlePOSTSchedule();
 
-    bool isTimeValid(string time);
-    bool isAmountValid(string amount);
-    bool isValidFeedingSize(double amount);
+    bool isAmountValid(string);
+    bool isValidFeedingSize(double);
 
-    string convertToString(char* array, int size); 
+    bool isTimeValid(string);
+    bool isHourValid(int);
+    bool isMinutesValid(int);
 
-    void handleBadRequest(string text); 
-    void handleNotAcceptable(string text); 
+    string padTime(string);
+
+    //string convertToString(char* array, int size); 
+
+    void handleBadRequest(string); 
+    void handleNotAcceptable(string); 
 
 };
 

@@ -8,6 +8,7 @@
 #include "feeding.h"
 #include "motorManager.h"
 #include "schedule.h"
+#include "timeManager.h"
 
 WifiManager *wifiManager = new WifiManager();
 Settings settings;
@@ -16,17 +17,19 @@ ServerManager *serverManager = new ServerManager();
 Feeding feeding;
 MotorManager *motorManager = new MotorManager();
 Schedule schedule;
+TimeManager *timeManager = new TimeManager();
 
 const double minFeedingAmount = 0.125;
 
 double getMinFeedingAmount();
+
 Settings getSettings();
 void setSettings(Settings);
 void deleteSettings();
 void setFeeding(Feeding);
 double getDispenseNumberOfTimes(double);
 void getSchedule();
-void setSchedule();
+void setSchedule(Schedule);
 
 void setup() {
   Serial.begin(115200);
@@ -106,8 +109,14 @@ double getDispenseNumberOfTimes(double newAmount) {
 }
 
 void setSchedule(Schedule newSchedule) {
+  String tempCupString = String(newSchedule.scheduleAmount, 3);
+  Serial.print("Cups Entered in Schedule: ");
+  Serial.println(tempCupString);
+  Serial.print("Amount Motor turns:  ");
+  String tempTurnString = String(getDispenseNumberOfTimes(newSchedule.scheduleAmount), 0);
+  Serial.println(tempTurnString);
+  Serial.println(newSchedule.scheduleTime.c_str());
 
- 
   //sdManager->writeSettings(settings);
   
 }
