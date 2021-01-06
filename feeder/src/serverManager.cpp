@@ -8,8 +8,13 @@ WebServer *webserver = nullptr;
 std::function<Settings()> onGetSettingsCallback;
 std::function<void(Settings)> onSetSettingsCallback;
 std::function<void()> onDeleteSettingsCallback;
+
 std::function<double()> onGetMinFeedingAmountCallback;
 std::function<void(Feeding)> onSetFeedingCallback;
+
+std::function<Schedule()> onGetScheduleCallback;
+std::function<void(Schedule)> onSetScheduleCallback;
+
 ServerManager::ServerManager() {
     webserver = new WebServer(80); // HTTP default to port 80 :: HTTPS defaults to port 443
 }
@@ -19,7 +24,10 @@ void ServerManager::begin() {
     webserver->on("/settings", HTTP_GET, std::bind(&ServerManager::handleGETSettings, this));
     webserver->on("/settings", HTTP_PUT, std::bind(&ServerManager::handlePUTSettings, this));
     webserver->on("/settings", HTTP_DELETE, std::bind(&ServerManager::handleDELETESettings, this));
+
     webserver->on("/feed", HTTP_POST, std::bind(&ServerManager::handlePOSTFeeding, this));
+
+    webserver->on("/schedule", HTTP_POST, std::bind(&ServerManager::handlePOSTSchedule, this));
     
     //All class function have a hidden first param that is their class.  This overwrites it and forces it to have one param. 
 }
@@ -51,17 +59,22 @@ void ServerManager::handleDELETESettings() {
 
 void ServerManager::handlePOSTFeeding() {
     Feeding newFeeding;
-    string timeString = webserver->arg("time").c_str();
     string amountString = webserver->arg("cups").c_str();
-
-    if(isTimeValid(timeString)) {
-        newFeeding.feedingTime = timeString;
-    }
 
     if(isAmountValid(amountString)) {
         newFeeding.feedingAmount = strtod(amountString.c_str(), NULL); 
         webserver->send(204);
         onSetFeedingCallback(newFeeding);
+    }
+}
+
+void ServerManager::handlePOSTSchedule() {
+    Schedule newSchedule;
+    string scheduleTime = webserver->arg("time").c_str();
+    string scheduleAmountString = webserver->arg("cups").c_str();
+
+    if(isTimeValid(timeString)) {
+        newFeeding.feedingTime = timeString;
     }
 }
 

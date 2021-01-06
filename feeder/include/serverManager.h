@@ -3,6 +3,7 @@
 
 #include "settings.h"
 #include "feeding.h"
+#include "schedule.h"
 
 #ifndef SERVER_SETTINGS  
 #define SERVER_SETTINGS
@@ -12,8 +13,6 @@ using namespace std;
 class ServerManager {
 public: 
     ServerManager();
-    //void getString();
-    //void setString();
     
     void begin();
     void handleClient();
@@ -23,6 +22,8 @@ public:
     void onDeleteSettings(std::function<void()> callback);
     void onGetMinFeedingAmount(std::function<double()> callback);
     void onSetFeeding(std::function<void(Feeding)> callback);
+    void onGetSchedule(std::function<Schedule()> callback);
+    void onSetSchedule(std::function<void(Schedule)> callback);
 
 private:
     Settings settings;
@@ -35,6 +36,9 @@ private:
     void handleGETFeedings();
     void handlePOSTFeeding();
     void handleDELETEFeeding();
+
+    void handleGetSchedule();
+    void handlePOSTSchedule();
 
     bool isTimeValid(string time);
     bool isAmountValid(string amount);

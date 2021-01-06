@@ -7,6 +7,7 @@
 #include "serverManager.h"
 #include "feeding.h"
 #include "motorManager.h"
+#include "schedule.h"
 
 WifiManager *wifiManager = new WifiManager();
 Settings settings;
@@ -14,6 +15,7 @@ SdManager *sdManager = new SdManager();
 ServerManager *serverManager = new ServerManager();
 Feeding feeding;
 MotorManager *motorManager = new MotorManager();
+Schedule schedule;
 
 const double minFeedingAmount = 0.125;
 
@@ -23,6 +25,8 @@ void setSettings(Settings);
 void deleteSettings();
 void setFeeding(Feeding);
 double getDispenseNumberOfTimes(double);
+void getSchedule();
+void setSchedule();
 
 void setup() {
   Serial.begin(115200);
@@ -38,6 +42,8 @@ void setup() {
   serverManager->onDeleteSettings(deleteSettings);
   serverManager->onGetMinFeedingAmount(getMinFeedingAmount);
   serverManager->onSetFeeding(setFeeding);
+  //serverManager->onGetSchedule(std::bind(&SdManager::readSettings, sdManager));
+  serverManager->onSetSchedule(setSchedule);
   serverManager->begin();
 
   //motorManager->onGetDispenseNumberOfTimes();
@@ -97,4 +103,11 @@ void setFeeding(Feeding newFeeding) {
 
 double getDispenseNumberOfTimes(double newAmount) {
   return (newAmount / minFeedingAmount);
+}
+
+void setSchedule(Schedule newSchedule) {
+
+ 
+  //sdManager->writeSettings(settings);
+  
 }
