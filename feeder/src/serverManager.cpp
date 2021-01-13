@@ -194,4 +194,3 @@ bool ServerManager::isMinutesValid(int userMinutes) {
         return true;
     }
 }
-

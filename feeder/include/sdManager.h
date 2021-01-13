@@ -34,6 +34,8 @@ private:
     std::string settingsFile;
     std::string scheduleFile;
     std::string feedingFile;
+
+    string generateGUID();
 };
 
 #endif

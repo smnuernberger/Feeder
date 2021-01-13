@@ -112,3 +112,32 @@ void SdManager::deleteFile(std::string fileName) {
         Serial.println("File deleted"); 
     }
 }
+
+string SdManager::generateGUID() {
+    string newGUID = ""; 
+    int lenthOfGUID = 36;
+
+    for(int i = 0; i < lenthOfGUID; i++) {
+        if(i==8 || i==12 || i==16 || i==20) {
+            newGUID += '-';
+        }
+        int randomNumberInDec = rand();
+        char *randomNumberInHex = "";
+        itoa(randomNumberInDec, randomNumberInHex, 16);
+        if(i==13) {
+            randomNumberInHex = "4";
+        }
+        if(i==17) {
+            //shift value with magic
+            char* shiftValue = "89AB";
+            int randomShiftValue = 1 + (std::rand() % (4-1 +1)); // Random 1-4
+            randomNumberInHex = new char(shiftValue[randomShiftValue]);
+        }
+        newGUID += randomNumberInHex;
+    }
+
+
+
+
+
+}
