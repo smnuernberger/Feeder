@@ -135,9 +135,5 @@ string SdManager::generateGUID() {
         }
         newGUID += randomNumberInHex;
     }
-
-
-
-
-
+    return newGUID;
 }

@@ -23,6 +23,7 @@ public:
     void readFeeding();
     void writeFeeding();
 
+    std::string generateGUID();
 private:
     Settings settings;
     fs::File myFile;
@@ -35,7 +36,6 @@ private:
     std::string scheduleFile;
     std::string feedingFile;
 
-    string generateGUID();
 };
 
 #endif
