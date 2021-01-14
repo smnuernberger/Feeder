@@ -80,7 +80,7 @@ void setSettings(Settings newSettings) {
     newSettings.ssid = settings.ssid;
   }
   Serial.println(newSettings.ssid.c_str());
-  Serial.println(newSettings.password.c_str());
+  //Serial.println(newSettings.password.c_str());
   Serial.println(newSettings.name.c_str()); 
 
   settings = newSettings;
