@@ -37,7 +37,7 @@ void setup() {
 
   sdManager->begin(); 
   settings = sdManager->readSettings();
-
+  delay(500);
   wifiManager->begin(settings);
 
   serverManager->onGetSettings(std::bind(&SdManager::readSettings, sdManager));  // Pass the function getSettings() as param.
@@ -51,6 +51,7 @@ void setup() {
 
   //motorManager->onGetDispenseNumberOfTimes();
   //motorManager->begin();
+  delay(500);
 }
 
 void loop() {

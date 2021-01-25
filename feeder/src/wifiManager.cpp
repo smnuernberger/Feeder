@@ -30,10 +30,11 @@ void WifiManager::begin(const Settings settings) {
         delay(10);
         if(!settings.ssid.empty()) {
             WiFi.begin(ssid, password);
-            Serial.println(password);
+            //Serial.println(password);
         }
     }
     this->settings = settings;
+    Serial.println(WiFi.localIP());
 }
 
 void WifiManager::checkStatus() {

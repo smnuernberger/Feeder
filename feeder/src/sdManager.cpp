@@ -14,7 +14,7 @@ using namespace std;
 
 SdManager::SdManager() {
     //Settings settings; 
-    settingsFile = "settings.txt";
+    settingsFile = "settings/settings.txt";
     scheduleFile = "schedule.txt";
     feedingFile = "feeding.txt";
 }
@@ -27,6 +27,8 @@ void SdManager::begin() {
         while(1);
     }
     Serial.println("Initialization Completed");
+    delay(1000);
+    SD.mkdir("settings");
 }
 
 Settings SdManager::readSettings() {
