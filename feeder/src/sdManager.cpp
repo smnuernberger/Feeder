@@ -75,7 +75,6 @@ std::vector<std::string> SdManager::read(std::string fileName, char delimiter) {
 
     while(myFile.available()) {
         line = myFile.readStringUntil(delimiter).c_str();
-        Serial.println(line.c_str());
         myData.push_back(line);
     }
     myFile.close();
@@ -97,7 +96,6 @@ void SdManager::write(std::string fileName, std::vector<std::string> myData, cha
     }
     if(myFile) {
         myFile.println(lineToFile.c_str());
-        Serial.println(lineToFile.c_str());
         Serial.println("Write to File Completed");
     } else {
         Serial.println("Did not write to File");
@@ -116,7 +114,7 @@ void SdManager::deleteFile(std::string fileName) {
 }
 
 string SdManager::generateGUID() {
-    string newGUID = ""; 
+    std::string newGUID = ""; 
     int lenthOfGUID = 36;
 
     for(int i = 0; i < lenthOfGUID; i++) {
@@ -124,16 +122,18 @@ string SdManager::generateGUID() {
             newGUID += '-';
         }
         int randomNumberInDec = rand();
-        char *randomNumberInHex = "";
+        char* randomNumberInHex = "";
         itoa(randomNumberInDec, randomNumberInHex, 16);
         if(i==13) {
-            randomNumberInHex = "4";
+            std::string temp = "4";
+            strcpy(randomNumberInHex, temp.c_str());
         }
         if(i==17) {
-            //shift value with magic
-            char* shiftValue = "89AB";
-            int randomShiftValue = 1 + (std::rand() % (4-1 +1)); // Random 1-4
-            randomNumberInHex = new char(shiftValue[randomShiftValue]);
+            std::string shiftValue = "89AB";
+            int randomShiftValue = 1 + (std::rand() % (4-1 +1));
+            char* tempValue = new char(shiftValue[randomShiftValue]);
+            //strcpy(randomNumberInHex, tempValue);
+            randomNumberInHex = tempValue;
         }
         newGUID += randomNumberInHex;
     }
